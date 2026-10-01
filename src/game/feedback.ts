@@ -40,6 +40,7 @@ export class Feedback {
           const angle = Math.atan2(e.normal.y, e.normal.x);
           this.audio.impact(e.speed, e.surface, e.material);
           this.impactParticles(e.material, e.pos.x, e.pos.y, angle, k);
+          if (k > 0.25) P.burst(e.pos.x, e.pos.y, { count: 1, color: m.accent, speed: 0, life: 0.3, size: 6 + k * 7, shape: 'ring' });
           if (e.surface === 'bouncer') P.burst(e.pos.x, e.pos.y, { count: 10, color: SURFACES.bouncer.edge, speed: 300, angle, spread: 1.4, shape: 'spark', life: 0.4 });
           this.camera.addTrauma(k * k * 0.5 * m.mass);
           if (k > 0.4) this.buzz(Math.round(10 + k * 20));
@@ -163,6 +164,9 @@ export class Feedback {
     const { x, y } = ball.pos;
     const back = Math.atan2(-ball.vel.y, -ball.vel.x);
     switch (ball.material) {
+      case 'normal':
+        if (speed > 180) P.burst(x, y + (ball.grounded ? 12 : 0), { count: 1, color: '#d1eee0', speed: 25, angle: back, spread: 0.7, life: 0.32, size: 2, shape: 'streak' });
+        break;
       case 'lava':
         P.burst(x, y, { count: 2, color: '#ffb020', speed: 60, angle: -Math.PI / 2, spread: 1.5, life: 0.6, gravity: -150, size: 2.5 });
         break;

@@ -101,6 +101,8 @@ export class Particles {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.lineCap = 'round';
     for (const p of this.pool) {
       if (!p.alive) continue;
       const k = p.life / p.max;
@@ -114,7 +116,8 @@ export class Particles {
           ctx.fill();
           break;
         case 'square':
-          ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((1 - k) * 5 + p.vx * 0.01);
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); ctx.restore();
           break;
         case 'streak':
         case 'spark': {
@@ -127,13 +130,13 @@ export class Particles {
           break;
         }
         case 'ring':
-          ctx.lineWidth = 2;
+          ctx.lineWidth = Math.max(0.5, k * 2.5);
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * (1 + (1 - k) * 4), 0, Math.PI * 2);
           ctx.stroke();
           break;
       }
     }
-    ctx.globalAlpha = 1;
+    ctx.restore();
   }
 }

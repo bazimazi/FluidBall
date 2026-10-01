@@ -40,6 +40,8 @@ export class Ui implements UiHooks {
   private hudMaterial: HTMLElement;
   private hudTime: HTMLElement;
   private hudFrags: HTMLElement;
+  private hudLevel: HTMLElement;
+  private playHints: HTMLElement;
   private labBar: HTMLElement;
   private toastBox: HTMLElement;
   private debug: HTMLElement;
@@ -52,16 +54,23 @@ export class Ui implements UiHooks {
     this.hudMaterial = h('div', { class: 'hud-material' });
     this.hudTime = h('div', { class: 'hud-time' });
     this.hudFrags = h('div', { class: 'hud-frags' });
+    this.hudLevel = h('div', { class: 'hud-level' });
+    this.playHints = h('div', { class: 'play-hints hidden' },
+      h('span', {}, h('kbd', {}, 'A'), h('kbd', {}, 'D'), ' Move'),
+      h('span', {}, h('kbd', {}, 'SPACE'), ' Jump / hold for height'),
+      h('span', {}, h('kbd', {}, 'R'), ' Restart'),
+    );
     this.hud = h(
       'div',
       { class: 'hud hidden' },
       this.hudMaterial,
+      this.hudLevel,
       h('div', { class: 'hud-right' }, this.hudFrags, this.hudTime, h('button', { class: 'icon-btn', 'aria-label': 'Pause', onclick: () => this.game.pause() }, '❚❚')),
     );
     this.labBar = h('div', { class: 'lab-bar hidden' });
     this.toastBox = h('div', { class: 'toasts', 'aria-live': 'polite' });
     this.debug = h('pre', { class: 'debug hidden' });
-    root.append(this.hud, this.labBar, this.toastBox, this.debug, this.screen);
+    root.append(this.hud, this.playHints, this.labBar, this.toastBox, this.debug, this.screen);
   }
 
   attach(game: Game): void {
@@ -77,6 +86,7 @@ export class Ui implements UiHooks {
     const playing = mode === 'play';
     this.hud.classList.toggle('hidden', !(playing || mode === 'paused'));
     this.labBar.classList.toggle('hidden', !(playing && this.game.session?.lab));
+    this.playHints.classList.toggle('hidden', !playing || !!this.game.session?.lab);
     if (mode === 'menu') this.renderMenu();
     else if (mode === 'paused') this.renderPause();
     else if (mode === 'compare') this.renderCompare();
@@ -87,11 +97,17 @@ export class Ui implements UiHooks {
     if (info.material !== this.lastMaterial) {
       this.lastMaterial = info.material;
       const m = MATERIALS[info.material];
-      this.hudMaterial.replaceChildren(h('img', { src: icon(info.material), alt: '' }), h('span', {}, m.name));
+      this.hudMaterial.replaceChildren(h('img', { src: icon(info.material), alt: '' }), h('div', {}, h('small', {}, 'CURRENT FORM'), h('span', {}, m.name)));
       this.hudMaterial.style.setProperty('--accent', m.accent);
       for (const b of Array.from(this.labBar.querySelectorAll('button[data-m]'))) b.classList.toggle('active', b.getAttribute('data-m') === info.material);
     }
     this.hudTime.textContent = info.lab ? 'LAB' : fmtTime(info.time);
+    const level = this.game.session?.level;
+    const title = `${level?.region ?? ''} / ${info.levelName}`;
+    if (this.hudLevel.dataset.title !== title) {
+      this.hudLevel.dataset.title = title;
+      this.hudLevel.replaceChildren(h('small', {}, level?.region ?? ''), h('span', {}, info.levelName));
+    }
     this.hudFrags.textContent = info.fragmentsTotal ? `◆ ${info.fragments}/${info.fragmentsTotal}` : '';
   }
 
@@ -142,7 +158,7 @@ export class Ui implements UiHooks {
   }
 
   private show(content: HTMLElement): void {
-    this.screen.classList.remove('hidden', 'see-through');
+    this.screen.classList.remove('hidden', 'see-through', 'home-screen');
     this.screen.replaceChildren(content);
     (content.querySelector('button.primary') as HTMLElement | null)?.focus();
   }
@@ -151,24 +167,41 @@ export class Ui implements UiHooks {
     if (this.subScreen === 'levels') return this.renderLevels();
     if (this.subScreen === 'settings') return this.renderSettings();
     const discovered = this.game.save.discovered;
-    this.show(
-      h(
-        'div',
-        { class: 'panel title' },
-        h('h1', {}, 'Fluid', h('span', {}, 'Ball')),
-        h('p', { class: 'tagline' }, 'Change what you are. Change how you move.'),
-        h(
-          'div',
-          { class: 'material-strip', 'aria-label': 'Discovered materials' },
-          ...MATERIAL_ORDER.map((m) =>
-            discovered.includes(m)
-              ? h('img', { src: icon(m), alt: MATERIALS[m].name, title: MATERIALS[m].name })
-              : h('span', { class: 'unknown', title: 'Undiscovered' }, '?'),
-          ),
+    const next = CAMPAIGN.find(l => this.game.isUnlocked(l) && !this.game.save.levels[l.id]?.completed) ?? CAMPAIGN[0];
+    const started = CAMPAIGN.some(l => this.game.save.levels[l.id]?.completed);
+    this.show(h('div', { class: 'home' },
+      h('header', { class: 'home-header' },
+        h('div', { class: 'wordmark' }, h('span', { class: 'brand-orbit', 'aria-hidden': 'true' }, '◌'), 'FLUID BALL'),
+        h('nav', { 'aria-label': 'Main navigation' },
+          h('button', { class: 'text-btn', onclick: () => this.openLevels() }, 'Worlds'),
+          h('button', { class: 'text-btn', onclick: () => this.openSettings('menu') }, 'Settings'),
         ),
-        h('div', { class: 'col' }, h('button', { class: 'primary', onclick: () => this.openLevels() }, 'Play'), h('button', { onclick: () => this.game.startLab() }, 'Material Lab'), h('button', { onclick: () => this.openSettings('menu') }, 'Settings')),
       ),
-    );
+      h('main', { class: 'hero' },
+        h('p', { class: 'eyebrow' }, h('span', { class: 'status-dot' }), 'A LITTLE CHANGE. A WHOLE NEW WORLD.'),
+        h('h1', {}, 'Find your', h('br'), h('em', {}, 'flow.')),
+        h('p', { class: 'tagline' }, 'Become water. Defy gravity. Ride the wind.', h('br'), 'An elemental adventure, one transformation at a time.'),
+        h('div', { class: 'hero-actions' },
+          h('button', { class: 'primary journey-btn', onclick: () => this.game.startLevel(next) }, started ? 'Continue journey' : 'Begin journey', h('span', { 'aria-hidden': 'true' }, '↗')),
+          h('button', { class: 'lab-link', onclick: () => this.game.startLab() }, 'Material Lab', h('span', { 'aria-hidden': 'true' }, '→')),
+        ),
+        h('p', { class: 'journey-note' }, started ? `NEXT / ${next.name}` : 'SEVEN WORLDS. EIGHT WAYS TO MOVE.'),
+      ),
+      h('aside', { class: 'art-caption', 'aria-hidden': 'true' }, h('span', {}, '01 / THE ELEMENTS'), h('strong', {}, 'Same soul. Different state.'), h('span', {}, 'Everything changes when you do.')),
+      h('footer', { class: 'home-footer' },
+        h('div', { class: 'collection-heading' }, h('span', { class: 'eyebrow' }, 'EXPLORE YOUR NATURE'), h('span', {}, `${discovered.length} / 8 discovered`)),
+        h('div', { class: 'material-collection', 'aria-label': 'Try a material in the lab' },
+          ...MATERIAL_ORDER.map((m, i) => h('button', {
+            class: `material-preview${discovered.includes(m) ? ' discovered' : ''}`,
+            style: `--material-color:${MATERIALS[m].accent};--i:${i}`,
+            title: `Try ${MATERIALS[m].name} in the Material Lab`,
+            onclick: () => { this.game.startLab(); this.game.setLabMaterial(m); },
+          }, h('img', { src: icon(m), alt: '' }), h('span', {}, MATERIALS[m].name), h('small', {}, `0${i + 1}`))),
+        ),
+        h('div', { class: 'footer-note' }, h('span', {}, 'A physics playground for the curious.'), h('span', {}, 'KEYBOARD + TOUCH')),
+      ),
+    ));
+    this.screen.classList.add('home-screen');
   }
 
   private openLevels(): void {
@@ -193,9 +226,9 @@ export class Ui implements UiHooks {
           const unlocked = this.game.isUnlocked(l);
           return h(
             'button',
-            { class: `level-card${rec?.completed ? ' done' : ''}`, disabled: !unlocked, onclick: () => this.game.startLevel(l) },
+            { class: `level-card${rec?.completed ? ' done' : ''}`, style: `--world-color:${MATERIALS[l.materials[l.materials.length - 1]].accent}`, disabled: !unlocked, onclick: () => this.game.startLevel(l) },
             h('span', { class: 'level-id' }, l.id),
-            h('span', { class: 'level-name' }, unlocked ? l.name : 'Locked'),
+            h('span', { class: 'level-name' }, l.name),
             h('span', { class: 'level-blurb' }, unlocked ? l.blurb : 'Finish the previous level'),
             h(
               'span',
@@ -212,6 +245,7 @@ export class Ui implements UiHooks {
       h(
         'div',
         { class: 'panel wide' },
+        h('p', { class: 'eyebrow' }, 'THE JOURNEY / SEVEN WORLDS'),
         h('div', { class: 'panel-head' }, h('h2', {}, 'Worlds'), h('button', { onclick: () => this.back() }, 'Back')),
         h('div', { class: 'regions' }, ...cards),
       ),

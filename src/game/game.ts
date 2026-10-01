@@ -96,6 +96,7 @@ export class Game {
       }
     });
     this.renderer.resize();
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => this.applySettings());
     this.startMenuBackdrop();
     requestAnimationFrame((t) => this.frame(t));
   }
@@ -106,10 +107,12 @@ export class Game {
 
   applySettings(): void {
     const s = this.save.settings;
+    const reduced = s.reducedEffects || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.classList.toggle('reduced-effects', reduced);
     this.input.settings.leftHanded = s.leftHanded;
     this.input.settings.stickRadius = s.stickRadius;
-    this.camera.settings.shake = s.shake;
-    this.particles.density = s.reducedEffects ? 0.35 : 1;
+    this.camera.settings.shake = reduced ? 0 : s.shake;
+    this.particles.density = reduced ? 0.35 : 1;
     this.feedback.haptics = s.haptics;
     this.audio.setVolume(s.volume);
     if (!s.debugOverlay) this.ui.onDebug(null);
@@ -139,6 +142,7 @@ export class Game {
     this.audio.unlock();
     this.compare = null;
     this.session = new Session(level, level === LAB);
+    this.deathFlash = this.respawnFade = 0;
     this.particles.clear();
     this.snapCamera();
     this.setMode('play');
@@ -169,6 +173,7 @@ export class Game {
   restart(): void {
     if (!this.session) return;
     this.session.restart();
+    this.deathFlash = this.respawnFade = 0;
     this.particles.clear();
     this.snapCamera();
     this.setMode('play');
@@ -263,7 +268,7 @@ export class Game {
       x: lerp(this.prevPos.x, s.ball.pos.x, alpha),
       y: lerp(this.prevPos.y, s.ball.pos.y, alpha),
     };
-    this.camera.update(dt, bp, s.ball.vel, this.renderer.width, this.renderer.height, s.level.bounds);
+    if (this.mode !== 'menu') this.camera.update(dt, bp, s.ball.vel, this.renderer.width, this.renderer.height, s.level.bounds);
 
     if (this.mode === 'play' && (this.settings.trajectoryAssist || s.lab)) {
       this.trajTimer -= dt;
@@ -286,7 +291,8 @@ export class Game {
       fragmentsKnown: this.save.levels[s.level.id]?.fragments ?? [],
       time: s.state.time,
       trajectory: this.trajectory,
-      reducedEffects: this.settings.reducedEffects,
+      reducedEffects: this.reducedEffects,
+      menu: this.mode === 'menu',
     };
     this.renderer.draw(view, this.camera, this.particles);
     this.deathFlash = Math.max(0, this.deathFlash - dt * 2.5);
@@ -330,7 +336,7 @@ export class Game {
         fragmentsTaken: new Set(),
         fragmentsKnown: [],
         time: c.time,
-        reducedEffects: this.settings.reducedEffects,
+        reducedEffects: this.reducedEffects,
       },
       this.camera,
       this.particles,
@@ -354,6 +360,10 @@ export class Game {
         this.setLabMaterial(order[Number(code.slice(5)) - 1]);
       }
     }
+  }
+
+  private get reducedEffects(): boolean {
+    return document.documentElement.classList.contains('reduced-effects');
   }
 
   /** Menu backdrop: a ball idly rolling back and forth. */
@@ -403,6 +413,8 @@ export class Game {
 
   private finish(time: number): void {
     const s = this.session!;
+    this.particles.burst(s.ball.pos.x, s.ball.pos.y, { count: 85, color: '#c2ffe5', speed: 360, angle: -Math.PI / 2, spread: Math.PI * 1.6, life: 1.8, size: 4, gravity: 220, shape: 'spark', drag: 0.6 });
+    this.particles.burst(s.ball.pos.x, s.ball.pos.y, { count: 2, color: '#f9d78e', speed: 0, life: 1.1, size: 24, shape: 'ring' });
     const rec = this.record(s.level.id);
     const newBest = rec.bestTime === null || time < rec.bestTime;
     rec.completed = true;

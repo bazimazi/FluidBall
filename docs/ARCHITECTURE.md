@@ -32,6 +32,7 @@ src/
     input.ts              keyboard + floating touch stick + jump half; latched presses
     feedback.ts           events -> particles, audio, shake, haptics
     render.ts             canvas renderer + material glyphs
+    scenery.ts            seeded parallax landscapes, regional palettes, vegetation and light
     particles.ts          fixed-size pooled particles
     audio.ts              procedural WebAudio voices per material
     save.ts               versioned save with migrations, sanitising and a backup copy

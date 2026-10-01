@@ -1,12 +1,12 @@
 :root {
-  --bg: #0d1020;
-  --panel: rgba(14, 18, 34, 0.9);
-  --panel-edge: rgba(255, 255, 255, 0.12);
-  --text: #eef1f8;
-  --muted: #9aa3b8;
-  --accent: #ffd23f;
+  --bg: #071923;
+  --panel: rgba(9, 28, 35, 0.94);
+  --panel-edge: rgba(185, 228, 210, 0.16);
+  --text: #edf4e8;
+  --muted: #9bb5b1;
+  --accent: #c4edab;
   --good: #7dffb0;
-  --radius: 14px;
+  --radius: 20px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -24,7 +24,7 @@ body {
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -65,11 +65,12 @@ button {
   padding: 12px 18px;
   min-height: 44px;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.2s, transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(185, 228, 210, 0.12);
+  border-color: rgba(185, 228, 210, 0.4);
 }
 
 button:active:not(:disabled) {
@@ -83,12 +84,13 @@ button:focus-visible {
 
 button.primary {
   background: var(--accent);
-  color: #1a1400;
+  color: #152c24;
   border-color: transparent;
 }
 
 button.primary:hover {
-  background: #ffe070;
+  background: #dbf6c8;
+  box-shadow: 0 6px 32px #c4edab18;
 }
 
 button:disabled {
@@ -105,9 +107,10 @@ button:disabled {
   align-items: center;
   justify-content: center;
   padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
-  background: rgba(5, 7, 16, 0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(3, 15, 21, 0.52);
+  backdrop-filter: blur(8px);
   overflow-y: auto;
+  touch-action: pan-y;
 }
 
 .screen.see-through {
@@ -125,11 +128,12 @@ button:disabled {
   background: var(--panel);
   border: 1px solid var(--panel-edge);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 32px;
   width: min(440px, 100%);
   max-height: 100%;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: panel-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .panel.wide {
@@ -138,6 +142,9 @@ button:disabled {
 
 .panel h2 {
   margin: 0 0 16px;
+  font-weight: 500;
+  font-size: 30px;
+  letter-spacing: -0.04em;
 }
 
 .panel-head {
@@ -255,6 +262,9 @@ button:disabled {
   text-align: left;
   padding: 14px;
   margin-bottom: 8px;
+  min-height: 125px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--world-color) 9%, transparent), transparent);
+  border-top: 2px solid color-mix(in srgb, var(--world-color) 40%, transparent);
 }
 
 .level-card.done {
@@ -360,9 +370,9 @@ button:disabled {
 
 .hud {
   position: absolute;
-  top: calc(10px + var(--safe-top));
-  left: calc(10px + var(--safe-left));
-  right: calc(10px + var(--safe-right));
+  top: calc(24px + var(--safe-top));
+  left: calc(28px + var(--safe-left));
+  right: calc(28px + var(--safe-right));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -378,16 +388,18 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px 6px 6px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 2px solid var(--accent);
-  border-radius: 999px;
+  padding: 9px 20px 9px 9px;
+  background: rgba(5, 24, 30, 0.78);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 14px;
   font-weight: 700;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px #00121c30;
 }
 
 .hud-material img {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
 }
 
 .hud-right {
@@ -400,9 +412,11 @@ button:disabled {
 .hud-frags {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  background: rgba(0, 0, 0, 0.45);
-  padding: 8px 12px;
+  background: rgba(5, 24, 30, 0.78);
+  padding: 12px 16px;
   border-radius: 10px;
+  border: 1px solid var(--panel-edge);
+  font-size: 14px;
 }
 
 .hud-frags:empty {
@@ -418,7 +432,7 @@ button:disabled {
 
 .toasts {
   position: absolute;
-  top: calc(64px + var(--safe-top));
+  top: calc(96px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   width: min(420px, calc(100% - 32px));
@@ -473,7 +487,10 @@ button:disabled {
   display: flex;
   gap: 6px;
   padding: 6px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(5, 24, 30, 0.88);
+  border: 1px solid var(--panel-edge);
+  backdrop-filter: blur(12px);
+  touch-action: pan-x;
   border-radius: 14px;
   max-width: calc(100% - 20px);
   overflow-x: auto;
@@ -600,4 +617,100 @@ button:disabled {
   .compare-panel th:nth-child(4) {
     display: none;
   }
+}
+
+/* The title screen lives in the landscape, with no modal behind it. */
+.screen.home-screen { background: none; backdrop-filter: none; padding: 0; display: block; }
+.home { position: relative; min-height: 100%; width: min(1600px, 100%); margin: auto; padding: 30px 6.5vw 22px; display: flex; flex-direction: column; }
+.home-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.wordmark { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 650; letter-spacing: 0.2em; }
+.brand-orbit { font: 40px/1 Georgia, serif; color: #c4edab; }
+.home-header nav { display: flex; gap: 14px; }
+.text-btn { background: none; border-color: transparent; font-size: 13px; font-weight: 400; color: #c4d4cf; }
+.hero { margin: auto 0; padding: 52px 0 38px; position: relative; z-index: 1; max-width: 600px; animation: panel-in 0.8s ease both; }
+.hero .eyebrow { font-size: 10px; letter-spacing: 0.2em; color: #a3c8b8; display: flex; align-items: center; gap: 10px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: #c4edab; box-shadow: 0 0 12px #c4edab80; }
+.hero h1 { font-size: clamp(68px, 7.8vw, 116px); line-height: 0.97; font-weight: 400; letter-spacing: -0.065em; margin: 25px 0; color: #f0f3e5; }
+.hero h1 em { font-family: Georgia, 'Times New Roman', serif; color: #c4edab; font-weight: 400; letter-spacing: -0.07em; }
+.hero .tagline { font-size: 14px; color: #acc2bb; line-height: 1.8; margin: 0 0 26px; }
+.hero-actions { display: flex; align-items: center; gap: 14px; }
+.journey-btn { min-width: 206px; display: flex; justify-content: space-between; align-items: center; gap: 28px; min-height: 53px; border-radius: 8px; font-size: 14px; }
+.journey-btn span { font-size: 23px; font-weight: 400; }
+.lab-link { background: transparent; border-color: transparent; color: #d7e1d7; font-weight: 400; font-size: 13px; }
+.lab-link span { padding-left: 14px; color: #a4c5b5; }
+.journey-note { font-size: 9px; letter-spacing: 0.16em; color: #78958f; margin: 18px 0 0; }
+.art-caption { position: absolute; top: 77%; right: 13%; text-align: center; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
+.art-caption span:first-child { color: #a3c8b8; font-size: 9px; letter-spacing: 0.18em; }
+.art-caption strong { font: italic 21px Georgia, serif; color: #d3e4d6; font-weight: 400; }
+.art-caption span:last-child { font-size: 11px; color: #8fb0a6; }
+.home-footer { position: relative; z-index: 1; margin-top: 10px; }
+.collection-heading { display: flex; align-items: center; gap: 18px; margin-bottom: 15px; }
+.collection-heading .eyebrow { margin: 0; font-size: 9px; letter-spacing: 0.18em; color: #a8c3b5; }
+.collection-heading > span:last-child { font-size: 10px; color: #78958f; }
+.material-collection { display: flex; width: max-content; max-width: 100%; gap: 5px; }
+.material-preview { position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; width: 73px; padding: 12px 6px 10px; border: 1px solid transparent; background: #13302d40; border-radius: 8px; color: #a6beb4; font-weight: 400; font-size: 10px; }
+.material-preview img { width: 31px; height: 31px; transition: transform 0.25s, filter 0.25s; }
+.material-preview small { position: absolute; top: 6px; right: 6px; color: #b0c7bc60; font-size: 7px; }
+.material-preview.discovered { border-bottom-color: #bddfa455; }
+.material-preview:hover:not(:disabled) { background: #bde9d014; border-color: var(--material-color); transform: translateY(-5px); }
+.material-preview:hover img { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 8px var(--material-color)); }
+.footer-note { display: flex; justify-content: space-between; color: #6e9186; font-size: 10px; border-top: 1px solid #c3e5d219; margin-top: 23px; padding-top: 14px; }
+.footer-note span:last-child { font-size: 9px; letter-spacing: 0.15em; }
+.hud-material small { display: block; font-size: 8px; letter-spacing: 0.13em; color: #99b3ab; margin-bottom: 2px; font-weight: 400; }
+.hud-material span { font-size: 14px; }
+.hud-level { text-align: center; position: absolute; left: 50%; transform: translateX(-50%); text-shadow: 0 2px 14px #071923; }
+.hud-level small { display: block; text-transform: uppercase; color: #b1c9bc; font-size: 9px; letter-spacing: 0.2em; margin-bottom: 6px; }
+.hud-level span { font: 22px Georgia, serif; color: #f0f3e5; }
+.play-hints { position: absolute; bottom: calc(22px + var(--safe-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 24px; font-size: 11px; color: #a4bbb2; white-space: nowrap; pointer-events: none !important; }
+kbd { display: inline-block; min-width: 21px; font: 9px 'Segoe UI', sans-serif; border: 1px solid #bfdac12e; border-radius: 4px; padding: 4px 5px; margin-right: 3px; color: #d7e5d8; background: #07192370; }
+.stats { margin: 24px 0; }
+.stat { border: 1px solid #bde9d012; padding: 15px; }
+.stat-value { font-size: 32px; font-weight: 400; margin: 6px 0; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.reduced-effects *, .reduced-effects *::before, .reduced-effects *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+@media (min-width: 1500px) { .home { padding-left: 100px; padding-right: 100px; } }
+@media (max-height: 800px) and (min-width: 761px) {
+  .hero { padding: 26px 0 20px; }
+  .hero h1 { font-size: clamp(65px, 7vw, 94px); margin: 18px 0; }
+  .home { padding-top: 20px; padding-bottom: 16px; }
+  .art-caption { top: 76%; right: 11%; }
+}
+@media (max-width: 1000px) { .art-caption { display: none; } .hero { max-width: 510px; } .hero .tagline { font-size: 13px; } }
+@media (max-width: 760px) {
+  .home { padding: calc(18px + var(--safe-top)) 6vw calc(18px + var(--safe-bottom)); }
+  .home-header nav { gap: 0; }
+  .text-btn { padding: 8px 10px; font-size: 12px; }
+  .wordmark { font-size: 10px; gap: 6px; }
+  .hero { padding: 42px 0 28px; }
+  .hero h1 { font-size: clamp(64px, 13vw, 92px); }
+  .hero .eyebrow { font-size: 8px; letter-spacing: 0.12em; }
+  .hero .tagline { font-size: 12px; max-width: 310px; }
+  .journey-btn { min-width: 180px; }
+  .hero-actions { gap: 3px; }
+  .lab-link { padding: 10px; }
+  .lab-link span { padding-left: 7px; }
+  .material-collection { display: grid; grid-template-columns: repeat(8, 1fr); width: 100%; gap: 2px; }
+  .material-preview { width: 100%; min-width: 0; font-size: 8px; padding: 10px 0; }
+  .material-preview img { width: 26px; height: 26px; }
+  .material-preview small { display: none; }
+  .footer-note { font-size: 9px; gap: 14px; }
+  .footer-note span:last-child { font-size: 7px; }
+  .hud { top: calc(12px + var(--safe-top)); left: 12px; right: 12px; }
+  .hud-level { top: 68px; }
+  .hud-level span { font-size: 18px; }
+  .hud-material { padding: 6px 12px 6px 6px; }
+  .hud-right { gap: 5px; }
+  .hud-time, .hud-frags { padding: 10px; font-size: 12px; }
+  .play-hints { gap: 10px; font-size: 9px; bottom: 14px; }
+  .regions { grid-template-columns: 1fr; }
+  .setting input[type='range'] { width: 110px; }
+}
+@media (pointer: coarse) { .play-hints { display: none; } }
+@media (max-height: 550px) {
+  .home { min-height: 640px; }
+  .panel { padding: 20px; }
+  .hud-level { top: 0; }
+  .hud-level span { font-size: 16px; }
+  .hud-level small { font-size: 8px; }
 }

@@ -16,6 +16,12 @@ npm run build    # type-check + production build into dist/
 
 In development, `?level=<id>` jumps straight into a level (`?level=lab`, `?level=4-1`), and `window.fluid` exposes the running game in the console.
 
+## Visuals and motion
+
+The game features a procedural twilight landscape with region-specific palettes, layered parallax, glowing vegetation, animated fluids, glass material orbs, movement ribbons, and reactive particles. The title screen's material collection opens each form directly in the lab. All art is drawn locally with Canvas 2D; no asset downloads or external services are needed.
+
+The **Reduced effects** setting calms the scenery, removes movement ribbons and extra deformation, reduces particles, and disables camera shake. The operating system's reduced-motion preference is also respected, including changes made while the game is open.
+
 ## Controls
 
 | Action | Keyboard | Touch |
